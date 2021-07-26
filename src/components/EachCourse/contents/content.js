@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, TextField } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
-import { Link, Redirect} from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import clsx from "clsx";
 import View from "./viewer";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -19,13 +19,13 @@ import YouTubeIcon from "@material-ui/icons/YouTube";
 import VideocamIcon from "@material-ui/icons/Videocam";
 import VideocamOffIcon from "@material-ui/icons/VideocamOff";
 import Tooltip from "@material-ui/core/Tooltip";
-import GetAppIcon from '@material-ui/icons/GetApp';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import LaunchIcon from '@material-ui/icons/Launch';
+import GetAppIcon from "@material-ui/icons/GetApp";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import LaunchIcon from "@material-ui/icons/Launch";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Skeleton from '@material-ui/lab/Skeleton';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Skeleton from "@material-ui/lab/Skeleton";
+import CircularProgress from "@material-ui/core/CircularProgress";
 const useStyles = makeStyles(() => ({
   "@global": {
     ".MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label":
@@ -56,20 +56,21 @@ const Content = (props) => {
   const [link, setlink] = useState("");
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState(false);
-  const [showPdf, setShowPdf] = useState('');
+  const [showPdf, setShowPdf] = useState("");
   const [error, setError] = useState("");
   const [openA, setOpenA] = useState(false);
   const [typed, setTyped] = useState(false);
   const [loading, setlaoding] = useState(false);
   const [Done, setDone] = useState(false);
-  const [file,setfilepath] = useState('')
+  const [file, setfilepath] = useState("");
+  const [url, setUrl] = useState("");
+  const [OpenFeature, setOpenFeature] = useState(false);
   const { code, token } = props;
   const course_id = code;
   const abort = new AbortController();
 
-
   useEffect(() => {
-    setlaoding(true)
+    setlaoding(true);
     fetch(`https://eng-asu-lms.herokuapp.com/courses/lessons/${course_id}`, {
       signal: abort.signal,
       method: "GET",
@@ -85,19 +86,20 @@ const Content = (props) => {
 
         return res.json();
       })
-      
+
       .then((data) => {
         props.fetchAction("lessons done", data);
       })
-      .then(   ()=>     {setlaoding(false)}
-      )
+      .then(() => {
+        setlaoding(false);
+      })
       .catch((error) => {
         if (error.name === "AbortError") {
           console.log("aborted");
         } else {
           props.fetchAction("lessons error");
         }
-        setlaoding(false)
+        setlaoding(false);
       });
     return () => abort.abort();
   }, [Done, code]);
@@ -116,6 +118,7 @@ const Content = (props) => {
     if (lesson.length == 0 && filename.length != 0) {
       setError("Enter Lesson Title");
     } else if (lesson.length != 0 && filename.length != 0) {
+      setlaoding(true);
       var formData = new FormData();
       formData.append(`upload`, filename);
       formData.append(`lesson_title`, lesson);
@@ -136,8 +139,8 @@ const Content = (props) => {
             throw Error(res.status);
           }
           setError("");
-          setDone(!Done)
-          setOpen(false)
+          setDone(!Done);
+          setOpen(false);
           setOpenA(true);
           setlesson("");
           setfile("");
@@ -145,7 +148,10 @@ const Content = (props) => {
             (input) => (input.value = null)
           );
         })
-        .catch((error) => alert('Error Occured!! Please try again'));
+        .then(() => {
+          setlaoding(false);
+        })
+        .catch((error) => alert("Error Occured!! Please try again"));
     } else if (lesson.length != 0 && filename.length == 0) {
       alert("please upload your file");
     } else if (lesson.length == 0 && filename.length == 0) {
@@ -168,17 +174,28 @@ const Content = (props) => {
         },
       }
     )
-      .then((response) => response.blob())
-      .then((blob) => {
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = `${lesson_title}.pdf`;
-        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-        a.click();
-        a.remove(); //afterwards we remove the element again
+      .then((response) => {
+        return response.json();
       })
-      .catch(() => console.log("error"));
+      .then((err) => {
+        setUrl(err);
+      })
+      // .then((blob) => {
+      //   var url = window.URL.createObjectURL(blob);
+      //   var a = document.createElement("a");
+      //   a.href = url;
+      //   a.download = `${lesson_title}.pdf`;
+      //   document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+      //   a.click();
+      //   a.remove(); //afterwards we remove the element again
+      // })
+      .catch(() => alert("Error please try again later"));
+  };
+  const OpenFeatures = () => {
+    setOpenFeature(true);
+  };
+  const CloseFeatures = () => {
+    setOpenFeature(false);
   };
   const handleClose = () => {
     setOpen(false);
@@ -203,18 +220,35 @@ const Content = (props) => {
         onClose={handleClose}
         TransitionComponent={Slide}
         autoHideDuration={1000}
-
       >
         <Alert variant="filled" severity="success">
           Lesson Uploaded
         </Alert>
       </Snackbar>
-
-      { loading?<div style={{maxWidth:'20%'}}><Skeleton/><Skeleton/> <Skeleton/></div>:props.lessonTitles ? (
+      <Snackbar
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        open={OpenFeature}
+        onClose={CloseFeatures}
+        TransitionComponent={Slide}
+        autoHideDuration={1000}
+      >
+        <Alert variant="filled" severity="success">
+          Feature Coming Soon
+        </Alert>
+      </Snackbar>
+      {loading ? (
+        <div style={{ maxWidth: "20%" }}>
+          <Skeleton />
+          <Skeleton /> <Skeleton />
+        </div>
+      ) : props.lessonTitles ? (
         props.lessonTitles.length === 0 ? (
           <h1>no content found</h1>
         ) : (
-          props.lessonTitles.map((title,index) => (
+          props.lessonTitles.map((title, index) => (
             <div key={index}>
               <TreeView
                 style={{
@@ -233,36 +267,42 @@ const Content = (props) => {
                     nodeId="2"
                     label="PDFs"
                     style={{ marginBottom: "10px" }}
+                    onClick={() => download(title.lesson_title)}
                   >
                     <Box>
-                    {title.lesson_title}.pdf
-
-
-                    <IconButton onClick={() => download(title.lesson_title)}>
-                      <GetAppIcon/>
-                    </IconButton>
-                    {showPdf!=index+1?    <IconButton onClick={download}>
-                    <VisibilityIcon/>
-                    </IconButton>:    <IconButton onClick={download}>
-                     <VisibilityOffIcon/>
-                    </IconButton> }
-
-                  <IconButton onClick={download}>
-                      
-                <LaunchIcon/>
-                    </IconButton>   
+                      {title.lesson_title}.pdf
+                      <IconButton href={url}>
+                        <GetAppIcon />
+                      </IconButton>
+                      {showPdf != index + 1 ? (
+                        <IconButton onClick={OpenFeatures}>
+                          <VisibilityIcon />
+                        </IconButton>
+                      ) : (
+                        <IconButton onClick={OpenFeatures}>
+                          <VisibilityOffIcon />
+                        </IconButton>
+                      )}
+                      <IconButton onClick={OpenFeatures}>
+                        <LaunchIcon />
+                      </IconButton>
                     </Box>
 
-                    {console.log('index' , index , 'show' , showPdf)}
-                    {showPdf!=index+1?null: 
-                 <iframe src={`${file}`} style={{    height:'790px',
-        width: '1000px',
-        border:'none'}}></iframe> 
-      }
+                    {console.log("index", index, "show", showPdf)}
+                    {showPdf != index + 1 ? null : (
+                      <iframe
+                        src={`${file}`}
+                        style={{
+                          height: "790px",
+                          width: "1000px",
+                          border: "none",
+                        }}
+                      ></iframe>
+                    )}
                   </TreeItem>
                   {console.log(title.video_id)}
-                  {title.video_id ?( <TreeItem nodeId="3" label="videos">
-                  
+                  {title.video_id ? (
+                    <TreeItem nodeId="3" label="videos">
                       <Box>
                         <div
                           style={{ display: "flex", flexDirection: "column" }}
@@ -305,8 +345,8 @@ const Content = (props) => {
                           {console.log(title.video_id)}
                         </div>
                       </Box>
-                      </TreeItem> ):null}
-                  
+                    </TreeItem>
+                  ) : null}
                 </TreeItem>
               </TreeView>
             </div>
@@ -322,8 +362,13 @@ const Content = (props) => {
             variant="contained"
             disabled={loading}
           >
-            
-            {loading? 'loading...':!open ? "Add Lesson" : !typed ? "x" : "done"}
+            {loading
+              ? "loading..."
+              : !open
+              ? "Add Lesson"
+              : !typed
+              ? "x"
+              : "done"}
           </Button>
         </div>
       ) : null}

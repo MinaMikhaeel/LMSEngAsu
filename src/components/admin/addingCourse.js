@@ -511,7 +511,8 @@ const Adding = (props) => {
 
           <Box  style={{height:width<900?'64%':width>1500?'67%':'60%',overflow:'hidden'}}>
                         {/* loading?               <CircularProgress className={classes.center}/> */}
-                        {props.datal ?(
+                        { loading?               <CircularProgress className={classes.center}/> :
+props.datal ?(
                            <AutoSizer >
                            {({width,height}) => (
                <List

@@ -46,7 +46,7 @@ const StudentQuiz = (props) => {
 
       console.log(answer);
       axios
-        .post("http://localhost:8080/submit", answer, {
+        .post("https://eng-asu-lms.herokuapp.com/submit", answer, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${props.token}`,

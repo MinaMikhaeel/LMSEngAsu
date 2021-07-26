@@ -311,7 +311,7 @@ export default function Login(props) {
           />
         </DialogTitle>
         <DialogContent
-          style={{ textAlign: "center", padding: 0, minHeight: "525px" }}
+          style={{ textAlign: "center", padding: 0, minHeight: "420px" }}
         >
           {instructors.length > 0 ? (
             <Box>

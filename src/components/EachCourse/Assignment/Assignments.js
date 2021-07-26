@@ -176,10 +176,7 @@ const Content = (props) => {
       setError("Enter Lesson Title");
     } else if (
       (lesson.length != 0 || props.role === "student") &&
-      filename.length != 0
-    ) {
-      setlaoding(true);
-      console.log("here");
+      filename.length != 0) {
       var formData = new FormData();
       formData.append(`upload`, filename);
       if (props.role === "student") {
@@ -190,6 +187,8 @@ const Content = (props) => {
 
       formData.append(`course_code`, course_code);
       if (props.role === "student") {
+        setlaoding(true);
+
         fetch(
           `https://eng-asu-lms.herokuapp.com/courses/course/assignmentUpload`,
           {
@@ -219,9 +218,10 @@ const Content = (props) => {
             setlaoding(false);
           })
           .then(() => setOpeFeatureA(true))
-          .catch((error) => console.log(error));
+          .catch((error) => alert("Error Occured!! Please try again"));
       } else if (props.role === "instructor") {
-        console.log("object");
+        setlaoding(true);
+
         fetch(
           `https://eng-asu-lms.herokuapp.com/courses/course/instructorUploadAssignment`,
           {
@@ -314,9 +314,10 @@ const Content = (props) => {
   const download = (title) => {
     setOpenFeature(true);
   };
-  console.log(url)
   const downloadDes = (title) => {
     const course_id = course.course._id;
+    console.log(course_id,title)
+
     fetch(
       `https://eng-asu-lms.herokuapp.com/courses/course/downloadAssignments/${course_id}/${title}`,
       {
@@ -326,12 +327,15 @@ const Content = (props) => {
         },
       }
     )
-    .then((res)=>{return res.json()})
-      .then((err) => {
-        setUrl(err)
+      .then((res) => {
+        return res.json();
       })
-      .catch(() => console.log("error"))
-      console.log('url',url)
+      .then((err) => {
+        console.log(err)
+        setUrl(err);
+      })
+      .catch(() => alert('Error! please try again'));
+    console.log("url", url);
   };
   const downloadStudent = (title) => {
     const course_id = course.course._id;
@@ -345,16 +349,16 @@ const Content = (props) => {
         },
       }
     )
-    .then((res)=>{return res.json()})
+      .then((res) => {
+        return res.json();
+      })
 
       .then((err) => {
-        setUrl(err)
+        setUrl(err);
       })
-      .catch(() => console.log("error"));
-      console.log(url)
+      .catch(() => alert('Error! please try again'));
+    console.log(url);
   };
-  console.log(url)
-
 
   if (props.role == "instructor") {
     return (
@@ -379,7 +383,7 @@ const Content = (props) => {
             horizontal: "center",
           }}
           open={OpenFeature}
-          onClose={setOpenFeature}
+          onClose={CloseFeatures}
           TransitionComponent={Slide}
           autoHideDuration={1000}
         >
@@ -428,16 +432,12 @@ const Content = (props) => {
                       <p style={{ fontWeight: "bolder", display: "inline" }}>
                         Description
                       </p>
-
+                  {console.log(url)}
                       <IconButton href={url}>
                         <GetAppIcon />
                       </IconButton>
                       {showPdf != key + 1 ? (
-                        <IconButton
-                          onClick={
-                            download
-                          }
-                        >
+                        <IconButton onClick={download}>
                           <VisibilityIcon />
                         </IconButton>
                       ) : (
@@ -450,13 +450,8 @@ const Content = (props) => {
                         </IconButton>
                       )}
 
-                      <IconButton
-                        onClick={
-                          download
-}
-                      >
-
-                          <LaunchIcon />
+                      <IconButton onClick={download}>
+                        <LaunchIcon />
                       </IconButton>
                     </Box>
                     {found ? (
@@ -600,7 +595,7 @@ const Content = (props) => {
             horizontal: "center",
           }}
           open={OpenFeature}
-          onClose={setOpenFeature}
+          onClose={CloseFeatures}
           TransitionComponent={Slide}
           autoHideDuration={1000}
         >
@@ -630,8 +625,6 @@ const Content = (props) => {
                 >
                   <TreeItem
                     nodeId="1"
-                    onClick={() => downloadDes(title.title)}
-
                     label={
                       props.AssTitle ? (
                         <div
@@ -683,21 +676,19 @@ const Content = (props) => {
                         </div>
                       )
                     }
+                    onClick={() => downloadDes(title.title)}
+
                   >
                     <Box>
                       <p style={{ fontWeight: "bolder", display: "inline" }}>
                         Description
                       </p>
-
+                      {console.log(url)}
                       <IconButton href={url}>
                         <GetAppIcon />
                       </IconButton>
                       {showPdf != key + 1 ? (
-                        <IconButton
-                          onClick={
-                            download
-                          }
-                        >
+                        <IconButton onClick={download}>
                           <VisibilityIcon />
                         </IconButton>
                       ) : (
@@ -710,11 +701,7 @@ const Content = (props) => {
                         </IconButton>
                       )}
 
-                      <IconButton
-                        onClick={
-                          download
-                        }
-                      >
+                      <IconButton onClick={download}>
                         <LaunchIcon />
                       </IconButton>
                     </Box>
@@ -728,10 +715,12 @@ const Content = (props) => {
                             label="Show Submission"
                             onClick={() => downloadStudent(title.title)}
                           >
+                                    {console.log(url)}
                             Assignment {asstitle.title}.pdf
                             <IconButton href={url}>
                               <GetAppIcon />
                             </IconButton>
+                            
                           </TreeItem>
                         ) : !props.AssTitle.some(
                             (el) => el.title === title.title

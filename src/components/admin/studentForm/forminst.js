@@ -214,7 +214,7 @@ const {width}=useWindowSize()
                 ? "This email is taken by another user"
                 : err === "wrongFormat"
                 ? "Invalid email format"
-                : "Enter Student Email"
+                : "Enter Instructor Email"
             }
             InputProps={{
               classes: {
@@ -253,7 +253,7 @@ const {width}=useWindowSize()
                 ? "This code is taken by another user"
                 : err === "short"
                 ? "the code must be more than 7"
-                : "Enter Student code"
+                : "Enter Instructor code"
             }
             InputProps={{
               classes: {

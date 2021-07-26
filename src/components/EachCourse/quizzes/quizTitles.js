@@ -20,8 +20,8 @@ import Typography from "@material-ui/core/Typography";
 import { Box, Container, Grid } from "@material-ui/core";
 import url from "../../../assets/img/Untitled.jpg";
 import url2 from "../../../assets/img/quiz1.jpg";
-import Skeleton from '@material-ui/lab/Skeleton';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Skeleton from "@material-ui/lab/Skeleton";
+import CircularProgress from "@material-ui/core/CircularProgress";
 const Titles = (props) => {
   const abort = new AbortController();
   const [hide, setHide] = useState(false);
@@ -37,6 +37,7 @@ const Titles = (props) => {
   const [NotStartDate, setNotStartDate] = useState(false);
   const [NotEndDate, setNotEndDate] = useState(false);
   const [loading, setlaoding] = useState(false);
+  const [loadingQuiz, setloadingQuiz] = useState(false);
 
   var currentDateTime = new Date().getTime();
 
@@ -52,16 +53,19 @@ const Titles = (props) => {
     setHide(toggle);
   };
   useEffect(() => {
-    setlaoding(true)
+    setlaoding(true);
     const course_code = id;
-    fetch(`https://eng-asu-lms.herokuapp.com/quizes/getQuizTitles/${course_code}`, {
-      signal: abort.signal,
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${props.token}`,
-      },
-    })
+    fetch(
+      `https://eng-asu-lms.herokuapp.com/quizes/getQuizTitles/${course_code}`,
+      {
+        signal: abort.signal,
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.token}`,
+        },
+      }
+    )
       .then((res) => {
         if (res.status === 404) {
           throw Error("404");
@@ -72,20 +76,21 @@ const Titles = (props) => {
       .then((data) => {
         props.fetchAction("quizzes done", data);
       })
-      .then(   ()=>     {setlaoding(false)}
-      )
+      .then(() => {
+        setlaoding(false);
+      })
       .catch((error) => {
         if (error.name === "AbortError") {
           console.log("aborted");
         } else {
           props.fetchAction("quizzes error");
         }
-        setlaoding(false)
-
+        setlaoding(false);
       });
     return () => abort.abort();
   }, [props.submit, id, DoneDelete]);
   const getQuiz = async (title) => {
+    setloadingQuiz(true)
     toggleHide(true);
     if (props.role === "instructor") {
       props.hidden(true);
@@ -136,13 +141,18 @@ const Titles = (props) => {
           setNotEndDate(false);
           console.log("pi");
         }
+        setloadingQuiz(false)
+
       } else if (res.status === 400) {
         console.log(result);
+        setloadingQuiz(false)
+        props.fetchAction("one quiz error");
+
       }
 
       return () => abort.abort();
     } catch (error) {
-      console.log(error);
+alert('Error Occured PleaseTry Again')
       if (error.name === "AbortError") {
         console.log("aborted");
       } else {
@@ -168,6 +178,7 @@ const Titles = (props) => {
   const check = (quiz) => {
     const id = quiz._id;
     const course_code = quiz.course_code;
+    setloadingQuiz(true)
     fetch(`https://eng-asu-lms.herokuapp.com/quizes/checkQuiz/${id}/${course_code}`, {
       method: "GET",
       headers: {
@@ -186,11 +197,13 @@ const Titles = (props) => {
         setDone(true);
         setScore(data);
         console.log("found");
+        setloadingQuiz(false)
       })
       .catch(() => {
         console.log("not found");
         setDone(false);
         setScore("");
+        setloadingQuiz(false)
       });
     getQuiz(quiz.title);
   };
@@ -222,7 +235,12 @@ const Titles = (props) => {
             marginBottom: "20px",
           }}
         >
-          {loading?<div style={{maxWidth:'20%'}}><Skeleton/><Skeleton/> <Skeleton/></div>: props.quizzes ? (
+          {loading ? (
+            <div style={{ maxWidth: "20%" }}>
+              <Skeleton />
+              <Skeleton /> <Skeleton />
+            </div>
+          ) : props.quizzes ? (
             <Container style={{ margin: 0 }}>
               <Grid container spacing={3}>
                 {props.quizzes.map((quiz, index) => (
@@ -234,7 +252,7 @@ const Titles = (props) => {
                             component="img"
                             style={{ maxHeight: "180px" }}
                             height="140"
-                            image={index%2===0?url:url2}
+                            image={index % 2 === 0 ? url : url2}
                           />
                           <CardContent>
                             <Typography
@@ -273,7 +291,18 @@ const Titles = (props) => {
         </div>
       ) : null}
       <div>
-        {hide && props.oneQuiz ? (
+        {loadingQuiz?            <div className="modal is-active" style={{ zIndex: "2000" }}>
+              {" "}
+              <div className="modal-background"></div>{" "}
+              <div className="modal-card">
+                <div className="modal-card-body yes content">
+                  {" "}
+                  <Skeleton />
+                  <Skeleton /> 
+                  <Skeleton />
+                </div>{" "}
+              </div></div>
+              :hide && props.oneQuiz ? (
           props.role === "instructor" ? (
             <StudentQuiz
               role={props.role}

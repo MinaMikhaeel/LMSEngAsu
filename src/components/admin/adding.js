@@ -686,8 +686,8 @@ const  closeDial=()=>{
               overflow: "hidden",
             }}
           >
-            {/* loading?               <CircularProgress className={classes.center}/> */}
-            {props.datal ? (
+            {loading?               <CircularProgress className={classes.center}/> :
+            props.datal ? (
               <AutoSizer>
                 {({ width, height }) => (
                   <List

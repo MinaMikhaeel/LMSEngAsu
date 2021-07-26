@@ -77,6 +77,7 @@ function Profile(props) {
   const newthe = coloortheme;
   const [open, setOpen] = useState(false);
   const [equal, setEqual] = useState(false);
+  const [loading, setloading] = useState(false);
 
   const handleClose = () => {
     setOpen(false);
@@ -88,7 +89,8 @@ function Profile(props) {
     setEqual(true);
   };
   const logout = () => {
-   
+    setloading(true)
+    console.log(loading)
     fetch("https://eng-asu-lms.herokuapp.com/users/logout", {
       method: "POST",
       headers: {
@@ -102,12 +104,14 @@ function Profile(props) {
         }
         props.signout('done')
         history.push("/");
+        setloading(false)
 
       })
 
       .then(console.log('done'))
       .catch(() => {
         props.signout('error');
+        setloading(false)
       });
 
   };
@@ -195,11 +199,13 @@ function Profile(props) {
           <Button
             className={classes.marginT}
             endIcon={<ExitToAppIcon />}
-            onClick={logout}
+            onClick={()=>{setloading(true)
+               logout() }}
             variant="contained"
             color="primary"
+            disabled={loading}
           >
-            Logout
+            {loading?'logging out...':'Logout'}
           </Button>
         </Box>
 

@@ -603,9 +603,9 @@ const handleOpenDial = () => {
               overflow: "hidden",
             }}
           >
-            {/*  loading?               <CircularProgress className={classes.center}/>
-:( */}
-{props.datal ?(
+             {loading?               <CircularProgress className={classes.center}/>
+:( 
+props.datal ?(
               <AutoSizer>
                 {({ width, height }) => (
                   <List
@@ -624,7 +624,7 @@ const handleOpenDial = () => {
               <h1 className={classes.center}>Empty Admin list</h1>
             ) : props.pending ? (
               <CircularProgress className={classes.center}/>
-            ) : null}
+            ) :null)}
           </Box>
           </Box>
 
